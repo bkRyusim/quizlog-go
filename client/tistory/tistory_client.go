@@ -5,8 +5,8 @@ import (
 	client "github.com/bkRyusim/quizlog-go/client/http"
 	"github.com/bkRyusim/quizlog-go/client/tistory/constants"
 	"github.com/bkRyusim/quizlog-go/client/tistory/response"
+	"github.com/bkRyusim/quizlog-go/config"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -20,11 +20,19 @@ type TistoryClient struct {
 	httpClient   *client.HttpClient
 }
 
-func New() *TistoryClient {
+func (t *TistoryClient) AccessToken() string {
+	return t.accessToken
+}
+
+func (t *TistoryClient) SetAccessToken(accessToken string) {
+	t.accessToken = accessToken
+}
+
+func NewTistoryClient() *TistoryClient {
 	t := TistoryClient{}
-	t.clientId = os.Getenv("TISTORY_CLIENT_ID")
-	t.clientSecret = os.Getenv("TISTORY_CLIENT_SECRET")
-	t.redirectUri = os.Getenv("TISTORY_REDIRECT_URI")
+	t.clientId = config.Config.TistoryConfig.ClientId
+	t.clientSecret = config.Config.TistoryConfig.ClientSecret
+	t.redirectUri = config.Config.TistoryConfig.RedirectUri
 	t.httpClient = client.New()
 
 	return &t

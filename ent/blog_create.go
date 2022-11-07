@@ -158,11 +158,11 @@ func (bc *BlogCreate) ExecX(ctx context.Context) {
 // defaults sets the default values of the builder before save.
 func (bc *BlogCreate) defaults() {
 	if _, ok := bc.mutation.CreatedAt(); !ok {
-		v := blog.DefaultCreatedAt
+		v := blog.DefaultCreatedAt()
 		bc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := bc.mutation.UpdatedAt(); !ok {
-		v := blog.DefaultUpdatedAt
+		v := blog.DefaultUpdatedAt()
 		bc.mutation.SetUpdatedAt(v)
 	}
 }

@@ -17,8 +17,8 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("userId").StorageKey("user_id"),
 		field.String("name").StorageKey("user_name"),
-		field.Time("createdAt").Default(time.Now()),
-		field.Time("updatedAt").Default(time.Now()).UpdateDefault(time.Now()),
+		field.Time("createdAt").Default(time.Now),
+		field.Time("updatedAt").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

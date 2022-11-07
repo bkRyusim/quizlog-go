@@ -19,11 +19,11 @@ func init() {
 	// blogDescCreatedAt is the schema descriptor for createdAt field.
 	blogDescCreatedAt := blogFields[2].Descriptor()
 	// blog.DefaultCreatedAt holds the default value on creation for the createdAt field.
-	blog.DefaultCreatedAt = blogDescCreatedAt.Default.(time.Time)
+	blog.DefaultCreatedAt = blogDescCreatedAt.Default.(func() time.Time)
 	// blogDescUpdatedAt is the schema descriptor for updatedAt field.
 	blogDescUpdatedAt := blogFields[3].Descriptor()
 	// blog.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
-	blog.DefaultUpdatedAt = blogDescUpdatedAt.Default.(time.Time)
+	blog.DefaultUpdatedAt = blogDescUpdatedAt.Default.(func() time.Time)
 	// blog.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
 	blog.UpdateDefaultUpdatedAt = blogDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
@@ -31,11 +31,11 @@ func init() {
 	// userDescCreatedAt is the schema descriptor for createdAt field.
 	userDescCreatedAt := userFields[2].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the createdAt field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(time.Time)
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updatedAt field.
 	userDescUpdatedAt := userFields[3].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
-	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(time.Time)
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

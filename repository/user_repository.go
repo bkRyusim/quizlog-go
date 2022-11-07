@@ -9,19 +9,11 @@ import (
 )
 
 type UserRepository struct {
-	client *ent.UserClient
-}
-
-func NewUserRepository(client *ent.UserClient) *UserRepository {
-	repository := UserRepository{}
-
-	repository.client = client
-
-	return &repository
+	Client *ent.UserClient `inject:"userClient"`
 }
 
 func (u *UserRepository) Find(id int) (*domain.User, error) {
-	user, err := u.client.Query().Where(user.ID(id)).Only(context.TODO())
+	user, err := u.Client.Query().Where(user.ID(id)).Only(context.TODO())
 
 	if err != nil {
 		return nil, fmt.Errorf("failed querying user: %w", err)
@@ -32,8 +24,8 @@ func (u *UserRepository) Find(id int) (*domain.User, error) {
 	return result, nil
 }
 
-func (u *UserRepository) Create(user domain.User) (int, error) {
-	result, err := u.client.Create().SetName(user.Name()).SetUserId(user.UserId()).Save(context.TODO())
+func (u *UserRepository) Create(user *domain.User) (int, error) {
+	result, err := u.Client.Create().SetName(user.Name()).SetUserId(user.UserId()).Save(context.TODO())
 	if err != nil {
 		return -1, fmt.Errorf("failed creating user: %w", err)
 	}
