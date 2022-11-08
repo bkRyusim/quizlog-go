@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	client "github.com/bkRyusim/quizlog-go/client/http"
 	"github.com/bkRyusim/quizlog-go/client/tistory/constants"
-	"github.com/bkRyusim/quizlog-go/client/tistory/response"
+	tistoryresponse "github.com/bkRyusim/quizlog-go/client/tistory/response"
+	"github.com/bkRyusim/quizlog-go/config"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -20,11 +20,19 @@ type TistoryClient struct {
 	httpClient   *client.HttpClient
 }
 
-func New() *TistoryClient {
+func (t *TistoryClient) AccessToken() string {
+	return t.accessToken
+}
+
+func (t *TistoryClient) SetAccessToken(accessToken string) {
+	t.accessToken = accessToken
+}
+
+func NewTistoryClient() *TistoryClient {
 	t := TistoryClient{}
-	t.clientId = os.Getenv("TISTORY_CLIENT_ID")
-	t.clientSecret = os.Getenv("TISTORY_CLIENT_SECRET")
-	t.redirectUri = os.Getenv("TISTORY_REDIRECT_URI")
+	t.clientId = config.Config.TistoryConfig.ClientId
+	t.clientSecret = config.Config.TistoryConfig.ClientSecret
+	t.redirectUri = config.Config.TistoryConfig.RedirectUri
 	t.httpClient = client.New()
 
 	return &t
@@ -50,7 +58,7 @@ func (t *TistoryClient) Init(code string) error {
 }
 
 // GetBlogInfo Get blog info
-func (t *TistoryClient) GetBlogInfo() (*response.TistoryBlogInfo, error) {
+func (t *TistoryClient) GetBlogInfo() (*tistoryresponse.TistoryBlogInfo, error) {
 	params := url.Values{
 		"access_token": {t.accessToken},
 		"output":       {"json"},
@@ -61,14 +69,14 @@ func (t *TistoryClient) GetBlogInfo() (*response.TistoryBlogInfo, error) {
 		return nil, err
 	}
 
-	result := &response.TistoryBlogInfo{}
+	result := &tistoryresponse.TistoryBlogInfo{}
 
 	json.Unmarshal(data, result)
 
 	return result, nil
 }
 
-func (t *TistoryClient) GetPosts(blogName string, pageNumber int) (*response.TistoryPostList, error) {
+func (t *TistoryClient) GetPosts(blogName string, pageNumber int) (*tistoryresponse.TistoryPostList, error) {
 	params := url.Values{
 		"access_token": {t.accessToken},
 		"output":       {"json"},
@@ -81,7 +89,7 @@ func (t *TistoryClient) GetPosts(blogName string, pageNumber int) (*response.Tis
 		return nil, err
 	}
 
-	result := &response.TistoryPostList{}
+	result := &tistoryresponse.TistoryPostList{}
 
 	json.Unmarshal(data, result)
 

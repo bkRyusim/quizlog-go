@@ -1,4 +1,4 @@
-package response
+package tistory_response
 
 type Post struct {
 	Id         string `json:"id"`
