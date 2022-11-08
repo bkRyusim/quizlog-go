@@ -463,6 +463,34 @@ func HasBlogsWith(preds ...predicate.Blog) predicate.User {
 	})
 }
 
+// HasQuiz applies the HasEdge predicate on the "quiz" edge.
+func HasQuiz() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(QuizTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, QuizTable, QuizColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasQuizWith applies the HasEdge predicate on the "quiz" edge with a given conditions (other predicates).
+func HasQuizWith(preds ...predicate.Quiz) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(QuizInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, QuizTable, QuizColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

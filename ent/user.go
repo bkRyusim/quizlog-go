@@ -33,9 +33,11 @@ type User struct {
 type UserEdges struct {
 	// Blogs holds the value of the blogs edge.
 	Blogs []*Blog `json:"blogs,omitempty"`
+	// Quiz holds the value of the quiz edge.
+	Quiz []*Quiz `json:"quiz,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // BlogsOrErr returns the Blogs value or an error if the edge
@@ -45,6 +47,15 @@ func (e UserEdges) BlogsOrErr() ([]*Blog, error) {
 		return e.Blogs, nil
 	}
 	return nil, &NotLoadedError{edge: "blogs"}
+}
+
+// QuizOrErr returns the Quiz value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) QuizOrErr() ([]*Quiz, error) {
+	if e.loadedTypes[1] {
+		return e.Quiz, nil
+	}
+	return nil, &NotLoadedError{edge: "quiz"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -111,6 +122,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 // QueryBlogs queries the "blogs" edge of the User entity.
 func (u *User) QueryBlogs() *BlogQuery {
 	return (&UserClient{config: u.config}).QueryBlogs(u)
+}
+
+// QueryQuiz queries the "quiz" edge of the User entity.
+func (u *User) QueryQuiz() *QuizQuery {
+	return (&UserClient{config: u.config}).QueryQuiz(u)
 }
 
 // Update returns a builder for updating this User.

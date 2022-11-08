@@ -5,16 +5,54 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/bkRyusim/quizlog-go/ent/quiz"
+	"github.com/bkRyusim/quizlog-go/ent/user"
 )
 
 // Quiz is the model entity for the Quiz schema.
 type Quiz struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// PostUrl holds the value of the "postUrl" field.
+	PostUrl string `json:"postUrl,omitempty"`
+	// Question holds the value of the "question" field.
+	Question string `json:"question,omitempty"`
+	// Answer holds the value of the "answer" field.
+	Answer string `json:"answer,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the QuizQuery when eager-loading is set.
+	Edges     QuizEdges `json:"edges"`
+	user_quiz *int
+}
+
+// QuizEdges holds the relations/edges for other nodes in the graph.
+type QuizEdges struct {
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e QuizEdges) UserOrErr() (*User, error) {
+	if e.loadedTypes[0] {
+		if e.User == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.User, nil
+	}
+	return nil, &NotLoadedError{edge: "user"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -23,6 +61,12 @@ func (*Quiz) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case quiz.FieldID:
+			values[i] = new(sql.NullInt64)
+		case quiz.FieldPostUrl, quiz.FieldQuestion, quiz.FieldAnswer:
+			values[i] = new(sql.NullString)
+		case quiz.FieldCreatedAt, quiz.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case quiz.ForeignKeys[0]: // user_quiz
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Quiz", columns[i])
@@ -45,9 +89,51 @@ func (q *Quiz) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			q.ID = int(value.Int64)
+		case quiz.FieldPostUrl:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field postUrl", values[i])
+			} else if value.Valid {
+				q.PostUrl = value.String
+			}
+		case quiz.FieldQuestion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field question", values[i])
+			} else if value.Valid {
+				q.Question = value.String
+			}
+		case quiz.FieldAnswer:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field answer", values[i])
+			} else if value.Valid {
+				q.Answer = value.String
+			}
+		case quiz.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				q.CreatedAt = value.Time
+			}
+		case quiz.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				q.UpdatedAt = value.Time
+			}
+		case quiz.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_quiz", value)
+			} else if value.Valid {
+				q.user_quiz = new(int)
+				*q.user_quiz = int(value.Int64)
+			}
 		}
 	}
 	return nil
+}
+
+// QueryUser queries the "user" edge of the Quiz entity.
+func (q *Quiz) QueryUser() *UserQuery {
+	return (&QuizClient{config: q.config}).QueryUser(q)
 }
 
 // Update returns a builder for updating this Quiz.
@@ -72,7 +158,21 @@ func (q *Quiz) Unwrap() *Quiz {
 func (q *Quiz) String() string {
 	var builder strings.Builder
 	builder.WriteString("Quiz(")
-	builder.WriteString(fmt.Sprintf("id=%v", q.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", q.ID))
+	builder.WriteString("postUrl=")
+	builder.WriteString(q.PostUrl)
+	builder.WriteString(", ")
+	builder.WriteString("question=")
+	builder.WriteString(q.Question)
+	builder.WriteString(", ")
+	builder.WriteString("answer=")
+	builder.WriteString(q.Answer)
+	builder.WriteString(", ")
+	builder.WriteString("createdAt=")
+	builder.WriteString(q.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(q.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -31,3 +31,15 @@ func (u *UserRepository) Create(user *domain.User) (int, error) {
 	}
 	return result.ID, nil
 }
+
+func (u *UserRepository) FindByUserId(userId string) (*domain.User, error) {
+	user, err := u.Client.Query().Where(user.UserId(userId)).Only(context.TODO())
+
+	if err != nil {
+		return nil, fmt.Errorf("failed querying user: %w", err)
+	}
+
+	result := domain.NewUser(user.ID, user.UserId, user.Name)
+
+	return result, nil
+}

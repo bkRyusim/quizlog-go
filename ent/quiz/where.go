@@ -3,7 +3,10 @@
 package quiz
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/bkRyusim/quizlog-go/ent/predicate"
 )
 
@@ -75,6 +78,494 @@ func IDLT(id int) predicate.Quiz {
 func IDLTE(id int) predicate.Quiz {
 	return predicate.Quiz(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// PostUrl applies equality check predicate on the "postUrl" field. It's identical to PostUrlEQ.
+func PostUrl(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPostUrl), v))
+	})
+}
+
+// Question applies equality check predicate on the "question" field. It's identical to QuestionEQ.
+func Question(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldQuestion), v))
+	})
+}
+
+// Answer applies equality check predicate on the "answer" field. It's identical to AnswerEQ.
+func Answer(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAnswer), v))
+	})
+}
+
+// CreatedAt applies equality check predicate on the "createdAt" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// UpdatedAt applies equality check predicate on the "updatedAt" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// PostUrlEQ applies the EQ predicate on the "postUrl" field.
+func PostUrlEQ(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlNEQ applies the NEQ predicate on the "postUrl" field.
+func PostUrlNEQ(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlIn applies the In predicate on the "postUrl" field.
+func PostUrlIn(vs ...string) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldPostUrl), v...))
+	})
+}
+
+// PostUrlNotIn applies the NotIn predicate on the "postUrl" field.
+func PostUrlNotIn(vs ...string) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldPostUrl), v...))
+	})
+}
+
+// PostUrlGT applies the GT predicate on the "postUrl" field.
+func PostUrlGT(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlGTE applies the GTE predicate on the "postUrl" field.
+func PostUrlGTE(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlLT applies the LT predicate on the "postUrl" field.
+func PostUrlLT(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlLTE applies the LTE predicate on the "postUrl" field.
+func PostUrlLTE(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlContains applies the Contains predicate on the "postUrl" field.
+func PostUrlContains(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlHasPrefix applies the HasPrefix predicate on the "postUrl" field.
+func PostUrlHasPrefix(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlHasSuffix applies the HasSuffix predicate on the "postUrl" field.
+func PostUrlHasSuffix(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlEqualFold applies the EqualFold predicate on the "postUrl" field.
+func PostUrlEqualFold(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldPostUrl), v))
+	})
+}
+
+// PostUrlContainsFold applies the ContainsFold predicate on the "postUrl" field.
+func PostUrlContainsFold(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldPostUrl), v))
+	})
+}
+
+// QuestionEQ applies the EQ predicate on the "question" field.
+func QuestionEQ(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionNEQ applies the NEQ predicate on the "question" field.
+func QuestionNEQ(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionIn applies the In predicate on the "question" field.
+func QuestionIn(vs ...string) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldQuestion), v...))
+	})
+}
+
+// QuestionNotIn applies the NotIn predicate on the "question" field.
+func QuestionNotIn(vs ...string) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldQuestion), v...))
+	})
+}
+
+// QuestionGT applies the GT predicate on the "question" field.
+func QuestionGT(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionGTE applies the GTE predicate on the "question" field.
+func QuestionGTE(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionLT applies the LT predicate on the "question" field.
+func QuestionLT(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionLTE applies the LTE predicate on the "question" field.
+func QuestionLTE(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionContains applies the Contains predicate on the "question" field.
+func QuestionContains(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionHasPrefix applies the HasPrefix predicate on the "question" field.
+func QuestionHasPrefix(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionHasSuffix applies the HasSuffix predicate on the "question" field.
+func QuestionHasSuffix(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionEqualFold applies the EqualFold predicate on the "question" field.
+func QuestionEqualFold(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldQuestion), v))
+	})
+}
+
+// QuestionContainsFold applies the ContainsFold predicate on the "question" field.
+func QuestionContainsFold(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldQuestion), v))
+	})
+}
+
+// AnswerEQ applies the EQ predicate on the "answer" field.
+func AnswerEQ(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerNEQ applies the NEQ predicate on the "answer" field.
+func AnswerNEQ(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerIn applies the In predicate on the "answer" field.
+func AnswerIn(vs ...string) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldAnswer), v...))
+	})
+}
+
+// AnswerNotIn applies the NotIn predicate on the "answer" field.
+func AnswerNotIn(vs ...string) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldAnswer), v...))
+	})
+}
+
+// AnswerGT applies the GT predicate on the "answer" field.
+func AnswerGT(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerGTE applies the GTE predicate on the "answer" field.
+func AnswerGTE(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerLT applies the LT predicate on the "answer" field.
+func AnswerLT(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerLTE applies the LTE predicate on the "answer" field.
+func AnswerLTE(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerContains applies the Contains predicate on the "answer" field.
+func AnswerContains(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerHasPrefix applies the HasPrefix predicate on the "answer" field.
+func AnswerHasPrefix(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerHasSuffix applies the HasSuffix predicate on the "answer" field.
+func AnswerHasSuffix(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerEqualFold applies the EqualFold predicate on the "answer" field.
+func AnswerEqualFold(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAnswer), v))
+	})
+}
+
+// AnswerContainsFold applies the ContainsFold predicate on the "answer" field.
+func AnswerContainsFold(v string) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAnswer), v))
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "createdAt" field.
+func CreatedAtEQ(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "createdAt" field.
+func CreatedAtNEQ(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "createdAt" field.
+func CreatedAtIn(vs ...time.Time) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "createdAt" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "createdAt" field.
+func CreatedAtGT(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "createdAt" field.
+func CreatedAtGTE(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "createdAt" field.
+func CreatedAtLT(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "createdAt" field.
+func CreatedAtLTE(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updatedAt" field.
+func UpdatedAtEQ(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updatedAt" field.
+func UpdatedAtNEQ(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtIn applies the In predicate on the "updatedAt" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updatedAt" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Quiz {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtGT applies the GT predicate on the "updatedAt" field.
+func UpdatedAtGT(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updatedAt" field.
+func UpdatedAtGTE(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLT applies the LT predicate on the "updatedAt" field.
+func UpdatedAtLT(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updatedAt" field.
+func UpdatedAtLTE(v time.Time) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.Quiz {
+	return predicate.Quiz(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

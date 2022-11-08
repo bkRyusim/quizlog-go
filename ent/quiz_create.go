@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/bkRyusim/quizlog-go/ent/quiz"
+	"github.com/bkRyusim/quizlog-go/ent/user"
 )
 
 // QuizCreate is the builder for creating a Quiz entity.
@@ -16,6 +19,71 @@ type QuizCreate struct {
 	config
 	mutation *QuizMutation
 	hooks    []Hook
+}
+
+// SetPostUrl sets the "postUrl" field.
+func (qc *QuizCreate) SetPostUrl(s string) *QuizCreate {
+	qc.mutation.SetPostUrl(s)
+	return qc
+}
+
+// SetQuestion sets the "question" field.
+func (qc *QuizCreate) SetQuestion(s string) *QuizCreate {
+	qc.mutation.SetQuestion(s)
+	return qc
+}
+
+// SetAnswer sets the "answer" field.
+func (qc *QuizCreate) SetAnswer(s string) *QuizCreate {
+	qc.mutation.SetAnswer(s)
+	return qc
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (qc *QuizCreate) SetCreatedAt(t time.Time) *QuizCreate {
+	qc.mutation.SetCreatedAt(t)
+	return qc
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (qc *QuizCreate) SetNillableCreatedAt(t *time.Time) *QuizCreate {
+	if t != nil {
+		qc.SetCreatedAt(*t)
+	}
+	return qc
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (qc *QuizCreate) SetUpdatedAt(t time.Time) *QuizCreate {
+	qc.mutation.SetUpdatedAt(t)
+	return qc
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (qc *QuizCreate) SetNillableUpdatedAt(t *time.Time) *QuizCreate {
+	if t != nil {
+		qc.SetUpdatedAt(*t)
+	}
+	return qc
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (qc *QuizCreate) SetUserID(id int) *QuizCreate {
+	qc.mutation.SetUserID(id)
+	return qc
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (qc *QuizCreate) SetNillableUserID(id *int) *QuizCreate {
+	if id != nil {
+		qc = qc.SetUserID(*id)
+	}
+	return qc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (qc *QuizCreate) SetUser(u *User) *QuizCreate {
+	return qc.SetUserID(u.ID)
 }
 
 // Mutation returns the QuizMutation object of the builder.
@@ -29,6 +97,7 @@ func (qc *QuizCreate) Save(ctx context.Context) (*Quiz, error) {
 		err  error
 		node *Quiz
 	)
+	qc.defaults()
 	if len(qc.hooks) == 0 {
 		if err = qc.check(); err != nil {
 			return nil, err
@@ -92,8 +161,35 @@ func (qc *QuizCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (qc *QuizCreate) defaults() {
+	if _, ok := qc.mutation.CreatedAt(); !ok {
+		v := quiz.DefaultCreatedAt()
+		qc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := qc.mutation.UpdatedAt(); !ok {
+		v := quiz.DefaultUpdatedAt()
+		qc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (qc *QuizCreate) check() error {
+	if _, ok := qc.mutation.PostUrl(); !ok {
+		return &ValidationError{Name: "postUrl", err: errors.New(`ent: missing required field "Quiz.postUrl"`)}
+	}
+	if _, ok := qc.mutation.Question(); !ok {
+		return &ValidationError{Name: "question", err: errors.New(`ent: missing required field "Quiz.question"`)}
+	}
+	if _, ok := qc.mutation.Answer(); !ok {
+		return &ValidationError{Name: "answer", err: errors.New(`ent: missing required field "Quiz.answer"`)}
+	}
+	if _, ok := qc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Quiz.createdAt"`)}
+	}
+	if _, ok := qc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "Quiz.updatedAt"`)}
+	}
 	return nil
 }
 
@@ -121,6 +217,46 @@ func (qc *QuizCreate) createSpec() (*Quiz, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := qc.mutation.PostUrl(); ok {
+		_spec.SetField(quiz.FieldPostUrl, field.TypeString, value)
+		_node.PostUrl = value
+	}
+	if value, ok := qc.mutation.Question(); ok {
+		_spec.SetField(quiz.FieldQuestion, field.TypeString, value)
+		_node.Question = value
+	}
+	if value, ok := qc.mutation.Answer(); ok {
+		_spec.SetField(quiz.FieldAnswer, field.TypeString, value)
+		_node.Answer = value
+	}
+	if value, ok := qc.mutation.CreatedAt(); ok {
+		_spec.SetField(quiz.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := qc.mutation.UpdatedAt(); ok {
+		_spec.SetField(quiz.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if nodes := qc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   quiz.UserTable,
+			Columns: []string{quiz.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_quiz = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -138,6 +274,7 @@ func (qcb *QuizCreateBulk) Save(ctx context.Context) ([]*Quiz, error) {
 	for i := range qcb.builders {
 		func(i int, root context.Context) {
 			builder := qcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*QuizMutation)
 				if !ok {

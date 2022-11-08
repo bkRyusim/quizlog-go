@@ -21,6 +21,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeBlogs holds the string denoting the blogs edge name in mutations.
 	EdgeBlogs = "blogs"
+	// EdgeQuiz holds the string denoting the quiz edge name in mutations.
+	EdgeQuiz = "quiz"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// BlogsTable is the table that holds the blogs relation/edge.
@@ -30,6 +32,13 @@ const (
 	BlogsInverseTable = "blogs"
 	// BlogsColumn is the table column denoting the blogs relation/edge.
 	BlogsColumn = "user_blogs"
+	// QuizTable is the table that holds the quiz relation/edge.
+	QuizTable = "quizs"
+	// QuizInverseTable is the table name for the Quiz entity.
+	// It exists in this package in order to avoid circular dependency with the "quiz" package.
+	QuizInverseTable = "quizs"
+	// QuizColumn is the table column denoting the quiz relation/edge.
+	QuizColumn = "user_quiz"
 )
 
 // Columns holds all SQL columns for user fields.

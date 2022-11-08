@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/bkRyusim/quizlog-go/config"
 	"github.com/bkRyusim/quizlog-go/controller"
 	"github.com/bkRyusim/quizlog-go/ent"
 	"github.com/facebookgo/inject"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	jwtware "github.com/gofiber/jwt/v3"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 	"log"
@@ -34,8 +34,6 @@ func Setup() *fiber.App {
 		panic(err)
 	}
 
-	fmt.Println(config.Config)
-
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 
 	if err != nil {
@@ -51,11 +49,16 @@ func Setup() *fiber.App {
 	var g inject.Graph
 	var userController controller.UserController
 	var authController controller.AuthController
+	var postController controller.PostController
+	var quizController controller.QuizController
 
 	err = g.Provide(
 		&inject.Object{Value: &userController},
 		&inject.Object{Value: &authController},
-		&inject.Object{Value: client.User, Name: "userClient"})
+		&inject.Object{Value: &postController},
+		&inject.Object{Value: &quizController},
+		&inject.Object{Value: client.User, Name: "userClient"},
+		&inject.Object{Value: client.Quiz, Name: "quizClient"})
 
 	if err != nil {
 		panic(err)
@@ -74,6 +77,15 @@ func Setup() *fiber.App {
 	})
 
 	app.Post("/auth", authController.Login)
+
+	app.Use(jwtware.New(jwtware.Config{
+		SigningKey: []byte(config.Config.AuthConfig.SecretKey),
+	}))
+
+	app.Post("/join", userController.NewUser)
+	app.Get("/posts", postController.GetAllPosts)
+	app.Post("/quiz", quizController.NewQuiz)
+	app.Get("/quiz", quizController.GetAllQuiz)
 
 	return app
 }

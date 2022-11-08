@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/bkRyusim/quizlog-go/request"
 	"github.com/bkRyusim/quizlog-go/service"
 	"github.com/gofiber/fiber/v2"
@@ -8,6 +9,7 @@ import (
 
 type AuthController struct {
 	TistoryService *service.TistoryService `inject:""`
+	UserService    *service.UserService    `inject:""`
 }
 
 func (a *AuthController) Login(ctx *fiber.Ctx) error {
@@ -17,10 +19,11 @@ func (a *AuthController) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := a.TistoryService.Auth(authRequest)
+	response, err := a.TistoryService.Auth(authRequest)
 	if err != nil {
+		fmt.Println(err)
 		return ctx.SendStatus(500)
 	}
 
-	return ctx.JSON(token)
+	return ctx.JSON(response)
 }

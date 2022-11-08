@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/bkRyusim/quizlog-go/ent/blog"
 	"github.com/bkRyusim/quizlog-go/ent/predicate"
+	"github.com/bkRyusim/quizlog-go/ent/quiz"
 	"github.com/bkRyusim/quizlog-go/ent/user"
 )
 
@@ -76,6 +77,21 @@ func (uu *UserUpdate) AddBlogs(b ...*Blog) *UserUpdate {
 	return uu.AddBlogIDs(ids...)
 }
 
+// AddQuizIDs adds the "quiz" edge to the Quiz entity by IDs.
+func (uu *UserUpdate) AddQuizIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddQuizIDs(ids...)
+	return uu
+}
+
+// AddQuiz adds the "quiz" edges to the Quiz entity.
+func (uu *UserUpdate) AddQuiz(q ...*Quiz) *UserUpdate {
+	ids := make([]int, len(q))
+	for i := range q {
+		ids[i] = q[i].ID
+	}
+	return uu.AddQuizIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -100,6 +116,27 @@ func (uu *UserUpdate) RemoveBlogs(b ...*Blog) *UserUpdate {
 		ids[i] = b[i].ID
 	}
 	return uu.RemoveBlogIDs(ids...)
+}
+
+// ClearQuiz clears all "quiz" edges to the Quiz entity.
+func (uu *UserUpdate) ClearQuiz() *UserUpdate {
+	uu.mutation.ClearQuiz()
+	return uu
+}
+
+// RemoveQuizIDs removes the "quiz" edge to Quiz entities by IDs.
+func (uu *UserUpdate) RemoveQuizIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveQuizIDs(ids...)
+	return uu
+}
+
+// RemoveQuiz removes "quiz" edges to Quiz entities.
+func (uu *UserUpdate) RemoveQuiz(q ...*Quiz) *UserUpdate {
+	ids := make([]int, len(q))
+	for i := range q {
+		ids[i] = q[i].ID
+	}
+	return uu.RemoveQuizIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -249,6 +286,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.QuizCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.QuizTable,
+			Columns: []string{user.QuizColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: quiz.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedQuizIDs(); len(nodes) > 0 && !uu.mutation.QuizCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.QuizTable,
+			Columns: []string{user.QuizColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: quiz.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.QuizIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.QuizTable,
+			Columns: []string{user.QuizColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: quiz.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -315,6 +406,21 @@ func (uuo *UserUpdateOne) AddBlogs(b ...*Blog) *UserUpdateOne {
 	return uuo.AddBlogIDs(ids...)
 }
 
+// AddQuizIDs adds the "quiz" edge to the Quiz entity by IDs.
+func (uuo *UserUpdateOne) AddQuizIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddQuizIDs(ids...)
+	return uuo
+}
+
+// AddQuiz adds the "quiz" edges to the Quiz entity.
+func (uuo *UserUpdateOne) AddQuiz(q ...*Quiz) *UserUpdateOne {
+	ids := make([]int, len(q))
+	for i := range q {
+		ids[i] = q[i].ID
+	}
+	return uuo.AddQuizIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -339,6 +445,27 @@ func (uuo *UserUpdateOne) RemoveBlogs(b ...*Blog) *UserUpdateOne {
 		ids[i] = b[i].ID
 	}
 	return uuo.RemoveBlogIDs(ids...)
+}
+
+// ClearQuiz clears all "quiz" edges to the Quiz entity.
+func (uuo *UserUpdateOne) ClearQuiz() *UserUpdateOne {
+	uuo.mutation.ClearQuiz()
+	return uuo
+}
+
+// RemoveQuizIDs removes the "quiz" edge to Quiz entities by IDs.
+func (uuo *UserUpdateOne) RemoveQuizIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveQuizIDs(ids...)
+	return uuo
+}
+
+// RemoveQuiz removes "quiz" edges to Quiz entities.
+func (uuo *UserUpdateOne) RemoveQuiz(q ...*Quiz) *UserUpdateOne {
+	ids := make([]int, len(q))
+	for i := range q {
+		ids[i] = q[i].ID
+	}
+	return uuo.RemoveQuizIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -510,6 +637,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: blog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.QuizCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.QuizTable,
+			Columns: []string{user.QuizColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: quiz.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedQuizIDs(); len(nodes) > 0 && !uuo.mutation.QuizCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.QuizTable,
+			Columns: []string{user.QuizColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: quiz.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.QuizIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.QuizTable,
+			Columns: []string{user.QuizColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: quiz.FieldID,
 				},
 			},
 		}

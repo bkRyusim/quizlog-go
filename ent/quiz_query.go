@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/bkRyusim/quizlog-go/ent/predicate"
 	"github.com/bkRyusim/quizlog-go/ent/quiz"
+	"github.com/bkRyusim/quizlog-go/ent/user"
 )
 
 // QuizQuery is the builder for querying Quiz entities.
@@ -23,6 +24,8 @@ type QuizQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Quiz
+	withUser   *UserQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +60,28 @@ func (qq *QuizQuery) Unique(unique bool) *QuizQuery {
 func (qq *QuizQuery) Order(o ...OrderFunc) *QuizQuery {
 	qq.order = append(qq.order, o...)
 	return qq
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (qq *QuizQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: qq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := qq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := qq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(quiz.Table, quiz.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, quiz.UserTable, quiz.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(qq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Quiz entity from the query.
@@ -240,6 +265,7 @@ func (qq *QuizQuery) Clone() *QuizQuery {
 		offset:     qq.offset,
 		order:      append([]OrderFunc{}, qq.order...),
 		predicates: append([]predicate.Quiz{}, qq.predicates...),
+		withUser:   qq.withUser.Clone(),
 		// clone intermediate query.
 		sql:    qq.sql.Clone(),
 		path:   qq.path,
@@ -247,8 +273,31 @@ func (qq *QuizQuery) Clone() *QuizQuery {
 	}
 }
 
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (qq *QuizQuery) WithUser(opts ...func(*UserQuery)) *QuizQuery {
+	query := &UserQuery{config: qq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	qq.withUser = query
+	return qq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		PostUrl string `json:"postUrl,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Quiz.Query().
+//		GroupBy(quiz.FieldPostUrl).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (qq *QuizQuery) GroupBy(field string, fields ...string) *QuizGroupBy {
 	grbuild := &QuizGroupBy{config: qq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -265,6 +314,16 @@ func (qq *QuizQuery) GroupBy(field string, fields ...string) *QuizGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		PostUrl string `json:"postUrl,omitempty"`
+//	}
+//
+//	client.Quiz.Query().
+//		Select(quiz.FieldPostUrl).
+//		Scan(ctx, &v)
 func (qq *QuizQuery) Select(fields ...string) *QuizSelect {
 	qq.fields = append(qq.fields, fields...)
 	selbuild := &QuizSelect{QuizQuery: qq}
@@ -296,15 +355,26 @@ func (qq *QuizQuery) prepareQuery(ctx context.Context) error {
 
 func (qq *QuizQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Quiz, error) {
 	var (
-		nodes = []*Quiz{}
-		_spec = qq.querySpec()
+		nodes       = []*Quiz{}
+		withFKs     = qq.withFKs
+		_spec       = qq.querySpec()
+		loadedTypes = [1]bool{
+			qq.withUser != nil,
+		}
 	)
+	if qq.withUser != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, quiz.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Quiz).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Quiz{config: qq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -316,7 +386,43 @@ func (qq *QuizQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Quiz, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := qq.withUser; query != nil {
+		if err := qq.loadUser(ctx, query, nodes, nil,
+			func(n *Quiz, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (qq *QuizQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Quiz, init func(*Quiz), assign func(*Quiz, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Quiz)
+	for i := range nodes {
+		if nodes[i].user_quiz == nil {
+			continue
+		}
+		fk := *nodes[i].user_quiz
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_quiz" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (qq *QuizQuery) sqlCount(ctx context.Context) (int, error) {

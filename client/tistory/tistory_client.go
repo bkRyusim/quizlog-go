@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	client "github.com/bkRyusim/quizlog-go/client/http"
 	"github.com/bkRyusim/quizlog-go/client/tistory/constants"
-	"github.com/bkRyusim/quizlog-go/client/tistory/response"
+	tistoryresponse "github.com/bkRyusim/quizlog-go/client/tistory/response"
 	"github.com/bkRyusim/quizlog-go/config"
 	"net/url"
 	"strconv"
@@ -58,7 +58,7 @@ func (t *TistoryClient) Init(code string) error {
 }
 
 // GetBlogInfo Get blog info
-func (t *TistoryClient) GetBlogInfo() (*response.TistoryBlogInfo, error) {
+func (t *TistoryClient) GetBlogInfo() (*tistoryresponse.TistoryBlogInfo, error) {
 	params := url.Values{
 		"access_token": {t.accessToken},
 		"output":       {"json"},
@@ -69,14 +69,14 @@ func (t *TistoryClient) GetBlogInfo() (*response.TistoryBlogInfo, error) {
 		return nil, err
 	}
 
-	result := &response.TistoryBlogInfo{}
+	result := &tistoryresponse.TistoryBlogInfo{}
 
 	json.Unmarshal(data, result)
 
 	return result, nil
 }
 
-func (t *TistoryClient) GetPosts(blogName string, pageNumber int) (*response.TistoryPostList, error) {
+func (t *TistoryClient) GetPosts(blogName string, pageNumber int) (*tistoryresponse.TistoryPostList, error) {
 	params := url.Values{
 		"access_token": {t.accessToken},
 		"output":       {"json"},
@@ -89,7 +89,7 @@ func (t *TistoryClient) GetPosts(blogName string, pageNumber int) (*response.Tis
 		return nil, err
 	}
 
-	result := &response.TistoryPostList{}
+	result := &tistoryresponse.TistoryPostList{}
 
 	json.Unmarshal(data, result)
 

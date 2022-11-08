@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/bkRyusim/quizlog-go/ent/blog"
+	"github.com/bkRyusim/quizlog-go/ent/quiz"
 	"github.com/bkRyusim/quizlog-go/ent/user"
 )
 
@@ -74,6 +75,21 @@ func (uc *UserCreate) AddBlogs(b ...*Blog) *UserCreate {
 		ids[i] = b[i].ID
 	}
 	return uc.AddBlogIDs(ids...)
+}
+
+// AddQuizIDs adds the "quiz" edge to the Quiz entity by IDs.
+func (uc *UserCreate) AddQuizIDs(ids ...int) *UserCreate {
+	uc.mutation.AddQuizIDs(ids...)
+	return uc
+}
+
+// AddQuiz adds the "quiz" edges to the Quiz entity.
+func (uc *UserCreate) AddQuiz(q ...*Quiz) *UserCreate {
+	ids := make([]int, len(q))
+	for i := range q {
+		ids[i] = q[i].ID
+	}
+	return uc.AddQuizIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -231,6 +247,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: blog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.QuizIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.QuizTable,
+			Columns: []string{user.QuizColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: quiz.FieldID,
 				},
 			},
 		}

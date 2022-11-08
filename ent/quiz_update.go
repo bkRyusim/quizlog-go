@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/bkRyusim/quizlog-go/ent/predicate"
 	"github.com/bkRyusim/quizlog-go/ent/quiz"
+	"github.com/bkRyusim/quizlog-go/ent/user"
 )
 
 // QuizUpdate is the builder for updating Quiz entities.
@@ -27,9 +29,72 @@ func (qu *QuizUpdate) Where(ps ...predicate.Quiz) *QuizUpdate {
 	return qu
 }
 
+// SetPostUrl sets the "postUrl" field.
+func (qu *QuizUpdate) SetPostUrl(s string) *QuizUpdate {
+	qu.mutation.SetPostUrl(s)
+	return qu
+}
+
+// SetQuestion sets the "question" field.
+func (qu *QuizUpdate) SetQuestion(s string) *QuizUpdate {
+	qu.mutation.SetQuestion(s)
+	return qu
+}
+
+// SetAnswer sets the "answer" field.
+func (qu *QuizUpdate) SetAnswer(s string) *QuizUpdate {
+	qu.mutation.SetAnswer(s)
+	return qu
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (qu *QuizUpdate) SetCreatedAt(t time.Time) *QuizUpdate {
+	qu.mutation.SetCreatedAt(t)
+	return qu
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (qu *QuizUpdate) SetNillableCreatedAt(t *time.Time) *QuizUpdate {
+	if t != nil {
+		qu.SetCreatedAt(*t)
+	}
+	return qu
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (qu *QuizUpdate) SetUpdatedAt(t time.Time) *QuizUpdate {
+	qu.mutation.SetUpdatedAt(t)
+	return qu
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (qu *QuizUpdate) SetUserID(id int) *QuizUpdate {
+	qu.mutation.SetUserID(id)
+	return qu
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (qu *QuizUpdate) SetNillableUserID(id *int) *QuizUpdate {
+	if id != nil {
+		qu = qu.SetUserID(*id)
+	}
+	return qu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (qu *QuizUpdate) SetUser(u *User) *QuizUpdate {
+	return qu.SetUserID(u.ID)
+}
+
 // Mutation returns the QuizMutation object of the builder.
 func (qu *QuizUpdate) Mutation() *QuizMutation {
 	return qu.mutation
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (qu *QuizUpdate) ClearUser() *QuizUpdate {
+	qu.mutation.ClearUser()
+	return qu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -38,6 +103,7 @@ func (qu *QuizUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	qu.defaults()
 	if len(qu.hooks) == 0 {
 		affected, err = qu.sqlSave(ctx)
 	} else {
@@ -86,6 +152,14 @@ func (qu *QuizUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (qu *QuizUpdate) defaults() {
+	if _, ok := qu.mutation.UpdatedAt(); !ok {
+		v := quiz.UpdateDefaultUpdatedAt()
+		qu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (qu *QuizUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -103,6 +177,56 @@ func (qu *QuizUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := qu.mutation.PostUrl(); ok {
+		_spec.SetField(quiz.FieldPostUrl, field.TypeString, value)
+	}
+	if value, ok := qu.mutation.Question(); ok {
+		_spec.SetField(quiz.FieldQuestion, field.TypeString, value)
+	}
+	if value, ok := qu.mutation.Answer(); ok {
+		_spec.SetField(quiz.FieldAnswer, field.TypeString, value)
+	}
+	if value, ok := qu.mutation.CreatedAt(); ok {
+		_spec.SetField(quiz.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := qu.mutation.UpdatedAt(); ok {
+		_spec.SetField(quiz.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if qu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   quiz.UserTable,
+			Columns: []string{quiz.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := qu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   quiz.UserTable,
+			Columns: []string{quiz.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, qu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -123,9 +247,72 @@ type QuizUpdateOne struct {
 	mutation *QuizMutation
 }
 
+// SetPostUrl sets the "postUrl" field.
+func (quo *QuizUpdateOne) SetPostUrl(s string) *QuizUpdateOne {
+	quo.mutation.SetPostUrl(s)
+	return quo
+}
+
+// SetQuestion sets the "question" field.
+func (quo *QuizUpdateOne) SetQuestion(s string) *QuizUpdateOne {
+	quo.mutation.SetQuestion(s)
+	return quo
+}
+
+// SetAnswer sets the "answer" field.
+func (quo *QuizUpdateOne) SetAnswer(s string) *QuizUpdateOne {
+	quo.mutation.SetAnswer(s)
+	return quo
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (quo *QuizUpdateOne) SetCreatedAt(t time.Time) *QuizUpdateOne {
+	quo.mutation.SetCreatedAt(t)
+	return quo
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (quo *QuizUpdateOne) SetNillableCreatedAt(t *time.Time) *QuizUpdateOne {
+	if t != nil {
+		quo.SetCreatedAt(*t)
+	}
+	return quo
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (quo *QuizUpdateOne) SetUpdatedAt(t time.Time) *QuizUpdateOne {
+	quo.mutation.SetUpdatedAt(t)
+	return quo
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (quo *QuizUpdateOne) SetUserID(id int) *QuizUpdateOne {
+	quo.mutation.SetUserID(id)
+	return quo
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (quo *QuizUpdateOne) SetNillableUserID(id *int) *QuizUpdateOne {
+	if id != nil {
+		quo = quo.SetUserID(*id)
+	}
+	return quo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (quo *QuizUpdateOne) SetUser(u *User) *QuizUpdateOne {
+	return quo.SetUserID(u.ID)
+}
+
 // Mutation returns the QuizMutation object of the builder.
 func (quo *QuizUpdateOne) Mutation() *QuizMutation {
 	return quo.mutation
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (quo *QuizUpdateOne) ClearUser() *QuizUpdateOne {
+	quo.mutation.ClearUser()
+	return quo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -141,6 +328,7 @@ func (quo *QuizUpdateOne) Save(ctx context.Context) (*Quiz, error) {
 		err  error
 		node *Quiz
 	)
+	quo.defaults()
 	if len(quo.hooks) == 0 {
 		node, err = quo.sqlSave(ctx)
 	} else {
@@ -195,6 +383,14 @@ func (quo *QuizUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (quo *QuizUpdateOne) defaults() {
+	if _, ok := quo.mutation.UpdatedAt(); !ok {
+		v := quiz.UpdateDefaultUpdatedAt()
+		quo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (quo *QuizUpdateOne) sqlSave(ctx context.Context) (_node *Quiz, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -229,6 +425,56 @@ func (quo *QuizUpdateOne) sqlSave(ctx context.Context) (_node *Quiz, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := quo.mutation.PostUrl(); ok {
+		_spec.SetField(quiz.FieldPostUrl, field.TypeString, value)
+	}
+	if value, ok := quo.mutation.Question(); ok {
+		_spec.SetField(quiz.FieldQuestion, field.TypeString, value)
+	}
+	if value, ok := quo.mutation.Answer(); ok {
+		_spec.SetField(quiz.FieldAnswer, field.TypeString, value)
+	}
+	if value, ok := quo.mutation.CreatedAt(); ok {
+		_spec.SetField(quiz.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := quo.mutation.UpdatedAt(); ok {
+		_spec.SetField(quiz.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if quo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   quiz.UserTable,
+			Columns: []string{quiz.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := quo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   quiz.UserTable,
+			Columns: []string{quiz.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Quiz{config: quo.config}
 	_spec.Assign = _node.assignValues

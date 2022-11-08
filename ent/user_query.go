@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/bkRyusim/quizlog-go/ent/blog"
 	"github.com/bkRyusim/quizlog-go/ent/predicate"
+	"github.com/bkRyusim/quizlog-go/ent/quiz"
 	"github.com/bkRyusim/quizlog-go/ent/user"
 )
 
@@ -26,6 +27,7 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	withBlogs  *BlogQuery
+	withQuiz   *QuizQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,6 +79,28 @@ func (uq *UserQuery) QueryBlogs() *BlogQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(blog.Table, blog.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.BlogsTable, user.BlogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryQuiz chains the current query on the "quiz" edge.
+func (uq *UserQuery) QueryQuiz() *QuizQuery {
+	query := &QuizQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(quiz.Table, quiz.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.QuizTable, user.QuizColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -266,6 +290,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:      append([]OrderFunc{}, uq.order...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		withBlogs:  uq.withBlogs.Clone(),
+		withQuiz:   uq.withQuiz.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -281,6 +306,17 @@ func (uq *UserQuery) WithBlogs(opts ...func(*BlogQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withBlogs = query
+	return uq
+}
+
+// WithQuiz tells the query-builder to eager-load the nodes that are connected to
+// the "quiz" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithQuiz(opts ...func(*QuizQuery)) *UserQuery {
+	query := &QuizQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withQuiz = query
 	return uq
 }
 
@@ -357,8 +393,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withBlogs != nil,
+			uq.withQuiz != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -383,6 +420,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadBlogs(ctx, query, nodes,
 			func(n *User) { n.Edges.Blogs = []*Blog{} },
 			func(n *User, e *Blog) { n.Edges.Blogs = append(n.Edges.Blogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withQuiz; query != nil {
+		if err := uq.loadQuiz(ctx, query, nodes,
+			func(n *User) { n.Edges.Quiz = []*Quiz{} },
+			func(n *User, e *Quiz) { n.Edges.Quiz = append(n.Edges.Quiz, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -415,6 +459,37 @@ func (uq *UserQuery) loadBlogs(ctx context.Context, query *BlogQuery, nodes []*U
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "user_blogs" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadQuiz(ctx context.Context, query *QuizQuery, nodes []*User, init func(*User), assign func(*User, *Quiz)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Quiz(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.QuizColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_quiz
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_quiz" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_quiz" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

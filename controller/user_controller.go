@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/bkRyusim/quizlog-go/domain"
+	"github.com/bkRyusim/quizlog-go/request"
 	"github.com/bkRyusim/quizlog-go/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"strconv"
 )
 
@@ -13,12 +14,19 @@ type UserController struct {
 }
 
 func (u *UserController) NewUser(ctx *fiber.Ctx) error {
-	ctx.Body()
-	user := domain.NewUser(0, "123456", "백승윤")
+	joinRequest := new(request.Join)
+	if err := ctx.BodyParser(joinRequest); err != nil {
+		return err
+	}
+
+	auth := ctx.Locals("user").(*jwt.Token)
+	claims := auth.Claims.(jwt.MapClaims)
+	userId := claims["user_id"].(string)
+
+	user := domain.NewUser(0, userId, joinRequest.Name)
 	id, err := u.UserService.Create(user)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(strconv.Itoa(id))
 	return ctx.SendString(strconv.Itoa(id))
 }

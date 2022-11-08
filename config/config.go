@@ -3,7 +3,12 @@ package config
 var Config = RuntimeConfig{}
 
 type RuntimeConfig struct {
+	AuthConfig    AuthConfig    `mapstructure:"auth"`
 	TistoryConfig TistoryConfig `mapstructure:"tistory"`
+}
+
+type AuthConfig struct {
+	SecretKey string `mapstructure:"secret_key"`
 }
 
 type TistoryConfig struct {

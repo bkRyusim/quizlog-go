@@ -425,6 +425,22 @@ func (c *QuizClient) GetX(ctx context.Context, id int) *Quiz {
 	return obj
 }
 
+// QueryUser queries the user edge of a Quiz.
+func (c *QuizClient) QueryUser(q *Quiz) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := q.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(quiz.Table, quiz.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, quiz.UserTable, quiz.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(q.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *QuizClient) Hooks() []Hook {
 	return c.hooks.Quiz
@@ -524,6 +540,22 @@ func (c *UserClient) QueryBlogs(u *User) *BlogQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(blog.Table, blog.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.BlogsTable, user.BlogsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryQuiz queries the quiz edge of a User.
+func (c *UserClient) QueryQuiz(u *User) *QuizQuery {
+	query := &QuizQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(quiz.Table, quiz.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.QuizTable, user.QuizColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

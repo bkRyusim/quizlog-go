@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bkRyusim/quizlog-go/ent/blog"
+	"github.com/bkRyusim/quizlog-go/ent/quiz"
 	"github.com/bkRyusim/quizlog-go/ent/schema"
 	"github.com/bkRyusim/quizlog-go/ent/user"
 )
@@ -26,6 +27,18 @@ func init() {
 	blog.DefaultUpdatedAt = blogDescUpdatedAt.Default.(func() time.Time)
 	// blog.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
 	blog.UpdateDefaultUpdatedAt = blogDescUpdatedAt.UpdateDefault.(func() time.Time)
+	quizFields := schema.Quiz{}.Fields()
+	_ = quizFields
+	// quizDescCreatedAt is the schema descriptor for createdAt field.
+	quizDescCreatedAt := quizFields[3].Descriptor()
+	// quiz.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	quiz.DefaultCreatedAt = quizDescCreatedAt.Default.(func() time.Time)
+	// quizDescUpdatedAt is the schema descriptor for updatedAt field.
+	quizDescUpdatedAt := quizFields[4].Descriptor()
+	// quiz.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	quiz.DefaultUpdatedAt = quizDescUpdatedAt.Default.(func() time.Time)
+	// quiz.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	quiz.UpdateDefaultUpdatedAt = quizDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for createdAt field.
